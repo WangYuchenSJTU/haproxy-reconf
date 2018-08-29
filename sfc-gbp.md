@@ -61,4 +61,4 @@ Another runtime script should be used to operate the .lst file providing basic f
 
 Each time the .lst file is changed, a HAProxy reload is needed to take effect.
 
-Considering a IPv4 address normally takes 32 bytes to store, **every 30k (IP,role) pair will cost 1m file I/O for each reload**. This might not be negligible since we also need to reload very frequently.
+Considering a IPv4 address normally takes 32 bytes to store, **every 30k (IP,role) pair will cost 1mb file I/O for each reload**. This might not be negligible since we also need to reload very frequently.
