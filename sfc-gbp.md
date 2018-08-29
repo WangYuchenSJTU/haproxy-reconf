@@ -1,23 +1,26 @@
 # Realizing Service Function Chain and Group Base Policy in HAProxy
 
-## Option 1: stick table
-declare a [stick-table](https://cbonte.github.io/haproxy-dconv/1.8/configuration.html#4.2-stick-table%20type) for the frontend
+## Option 1: Stick-table
+Declare a [stick-table](https://cbonte.github.io/haproxy-dconv/1.8/configuration.html#4.2-stick-table%20type) for the frontend
 ```
 stick-table type ip size 1m expire 5m store gpc0
 ```
-notice that the final parameter:
+Notice that the final parameter:
   - `gpc0` : first General Purpose Counter. It is a positive 32-bit integer
     integer which may be used for anything. Most of the time it will be used
     to put a special tag on some entries, for instance to note that a
     specific behavior was detected and must be known for future matches.
 
+We can thus use the feature as shown in the following configuration file.
 ```
 global
+    mode http
     # enable Unix Socket commands (runtime API)
     stats socket /var/run/haproxy.sock mode 600 level admin
     # enbale another runtime API socket listening to a TCP port (dangerous) 
     stats socket ipv4@192.168.0.1:9999 level admin
     stats timeout 2m
+    
 frotend fe
     log global
     log-format "%ci:%cp [%t] %ft %b/%s %Tq/%Tw/%Tc/%Tr/%Tt %ST %B %CC %CS %tsc %ac/%fc/%bc/%sc/%rc %sq/%bq %hr %hs {%[ssl_c_verify],%{+Q}[ssl_c_s_dn],%{+Q}[ssl_c_i_dn]} %{+Q}r"
@@ -25,14 +28,14 @@ frotend fe
     # declare the table to store all incomming source IPs in 5 minutes, the maximum size is set to 1 million IPs
     stick-table type ip size 1m expire 5m store gpc0
 
-    # use acl to define user role according to gpc0
+    # use acl to define user roles suspect/attacker according to gpc0
     acl suspect src_get_gpc0 eq 1
     acl attacker src_get_gpc0 eq 2
 
     # for attacker, we can simply reject 
     tcp-request connection reject if attacker
 
-    # for suspect, we can redirect them to a slower backend
+    # for suspect, we can redirect them to a slow down backend
     use_backend be_429_slow_down if suspect
 
     # any other user goes to normal backend
