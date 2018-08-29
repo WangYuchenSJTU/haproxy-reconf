@@ -52,7 +52,7 @@ Then we can manipulate the `gpc0` through HAProxy [runtime API](https://cbonte.g
 
 For example, we can analyse HAProxy frontend log using ML model on another server in real time. Once attack deteceted, block the cooresponding IP by setting `gpc0 = 2` through runtime API.
 
-## Option 2: ACL
+## Option 2: ACL file
 For each group, store all the IPs in a .lst file and call the file in configuration.
 ```
 acl group-name src -f group-name.lst
